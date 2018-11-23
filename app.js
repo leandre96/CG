@@ -37,11 +37,13 @@ function init() {
   cube.receiveShadow = true;
 
   cube.position.set(0, 0.8,0);
-  cube.rotation.x = 89.8;
+  cube.rotation.x = 80.1;
 
   scene.add(cube);
 
 }
+
+
 
 function makeGround() {
   var groundGeo = new THREE.PlaneGeometry(100, 100);
@@ -176,6 +178,8 @@ camera = new THREE.PerspectiveCamera(
 );
 
 camera.position.set(0, 4.25, 15);
+var controls = new THREE.TrackballControls(camera);
+controls.addEventListener('change', render);
 scene.add(camera);
 
 
@@ -184,8 +188,16 @@ document.body.appendChild(renderer.domElement);
 
 camera.lookAt(new THREE.Vector3(0, 2, 0));
 
-(function render() {
+function render() {
   renderer.render(scene, camera);
 
   requestAnimationFrame(render);
-})();
+};
+
+function animate() {
+	requestAnimationFrame(animate);
+	controls.update();
+}
+
+render();
+animate();
