@@ -139,7 +139,7 @@ var loader = new THREE.OBJLoader();
 
 loader.load(
     // resource URL
-    'IronMan.obj',
+    '../obj/Chinese_dragon.obj',
     // called when resource is loaded
     function ( object ) {
         iron_man = object;

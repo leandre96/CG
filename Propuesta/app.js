@@ -1,4 +1,3 @@
-// scene, camera and renderer --> render the scene with camera.
 var scene = new THREE.Scene();
 var backgroundScene = "#40E0D0"
 scene.background = new THREE.Color(backgroundScene);
@@ -7,9 +6,7 @@ var renderer = new THREE.WebGLRenderer();
 var selected_object = null;
 renderer.setSize(window.innerWidth,window.innerHeight);
 document.body.appendChild(renderer.domElement);
-// to orbit with mouse
 var mouseOrbit = new THREE.OrbitControls(camera, renderer.domElement);
-// tablero
 var getMaterial = function(colorDesired){
     let material = new THREE.MeshPhongMaterial({ color:colorDesired, side: THREE.DoubleSide, flatShading: true });
     return material;}
@@ -21,7 +18,6 @@ var addTablero = function(){
     var black_material = getMaterial("#000000");   //fixed color
     var color_material = getMaterial(tile_color);  //to change with gui
     var black_color = -1;
-    //Chess Table has 64 tiles, 8 rows, 8 columns
     for(var i = 0; i < 8; i++){
         if (i % 2 == 0) { black_color = -1 }
         else { black_color = 1 };
@@ -35,7 +31,6 @@ var addTablero = function(){
             tablero.add(tile);
             black_color *= -1; } }
     scene.add(tablero); }
-
 var ambient_light, white_light;               // white
 var red_light, green_light, blue_light;       // RGB
 var cyan_light, magenta_light, yellow_light;  // CMY
@@ -47,26 +42,20 @@ var addLights = function( distanceFromCenter ){
     white_up_light = getSpotLight("#ffffff",1);
     white_up_light.position.set(0 - tile_width, 20, 0 - tile_width);
     scene.add(white_up_light);
-
     white_down_light = getSpotLight("#ffffff",1);
     white_down_light.position.set(0 - tile_width, -20, 0 - tile_width);
     scene.add(white_down_light);
-
     red_light = getSpotLight("#ff0000",6);
     red_light.position.set(distanceFromCenter - tile_width, 20, distanceFromCenter - tile_width);
     scene.add(red_light);
-
     green_light = getSpotLight("#00ff00",6);
     green_light.position.set( -distanceFromCenter - tile_width, 20, distanceFromCenter - tile_width);
     scene.add(green_light);
-
     blue_light = getSpotLight("#0000ff",6);
     blue_light.position.set( 0 - tile_width, 20, -distanceFromCenter - tile_width);
     scene.add(blue_light); }
-
 var prisma, esfera, piramide, toroide;
 var figurasCreadas = false;
-
 var addFiguras = function(){
     //piramide, la diferencia entre cylinder y cylinder 
     //buffer, es que el cylinder buffer permite que la cara 
@@ -96,14 +85,12 @@ var addFiguras = function(){
     esfera.position.set(-4,2,3);
     scene.add(esfera); 
     figurasCreadas = true; }
-
 var removeFiguras = function(){
     scene.remove(prisma);
     scene.remove(esfera);
     scene.remove(piramide);
     scene.remove(toroide); 
     figurasCreadas = false; }
-
 var rotateFigura = function(figura,vel_X,vel_Y,vel_Z){
     if(vel_X != 0){ figura.rotation.x += vel_X; }
     if(vel_Y != 0){ figura.rotation.y += vel_Y; }
@@ -113,7 +100,14 @@ var rotateFigura = function(figura,vel_X,vel_Y,vel_Z){
         rotateFigura(prisma,0,params.speed,0);
         rotateFigura(toroide,0,params.speed,0);
         rotateFigura(esfera,0,0,params.speed); }
-
+var loader = new THREE.OBJLoader();
+loader.load('obj/Chinese_dragon.obj',function ( object ) {iron_man = object;object.scale.set(0.1,0.1,0.1);scene.add( object );
+    object.add(pivotPoint);scene.add(pivotPoint);},
+    // called when loading is in progresses
+    function ( xhr ) {console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );},
+    // called when loading has errors
+    function ( error ) {console.log( 'An error happened' );}
+);
 // GUI
 var params = { up_light: true, down_light: false, background: backgroundScene, 
     red_light: false, green_light: false , blue_light: false, 
