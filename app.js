@@ -1,203 +1,251 @@
-var WIDTH = window.innerWidth,
-  HEIGHT = window.innerHeight,
-  intensity = 1,
-  group;
+var scene = new THREE.Scene();//Se crea una escena de Three.js
+var backgroundScene = "#40E0D0"//Se define un color de fondo para la escena
+scene.background = new THREE.Color(backgroundScene);//Se setea dicho color para la escena
+var camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,500);//Se define una cámara
+var renderer = new THREE.WebGLRenderer();//Se define un renderizador
+var selected_object = null;//Variable para elementos seleccionados
+renderer.setSize(window.innerWidth,window.innerHeight);//Se setea el tamaño al renderizador
+document.body.appendChild(renderer.domElement);//Se procede a añadir al renderizador al DOM
+var mouseOrbit = new THREE.OrbitControls(camera, renderer.domElement);//Se añade un controlador de órbita
+var getMaterial = function(colorDesired){//
+    let material = new THREE.MeshPhongMaterial({ color:colorDesired, side: THREE.DoubleSide, flatShading: true });
+    return material;}
+var tablero = new THREE.Group();//Se define un grupo para el tablero de ajedrez
+var tile_width=2;
+var tile_color="#ffffff";
+var addTablero = function(){//Función que se encargara de agregar elementos a la tablero de ajedrez
+    var tile_geometry = new THREE.BoxGeometry(tile_width,tile_width/10,tile_width);
+    var black_material = getMaterial("#000000");   //Color negro fijo
+    var color_material = getMaterial("#FFB6C1");  //to change with gui
+    var black_color = -1;
+	var length = 10; //Cantidad de cuadros de lado a lado
+    for(var i = 0; i < length; i++){
+        if (i % 2 == 0) { black_color = -1 }
+        else { black_color = 1 };
+        for(var j = 0; j < length; j++){
+            var material;
+            if(black_color == 1){ material = black_material; }   // iterate black and white
+            else{ material = color_material; }
+            var tile = new THREE.Mesh( tile_geometry, material );
+            tile.position.x = (-4 + j) * tile_width;
+            tile.position.z = (-4 + i) * tile_width;
+            tablero.add(tile);
+            black_color *= -1; } }
+    scene.add(tablero); }
+var ambient_light, white_light;               // white
+var red_light, green_light, blue_light;       // RGB
+var cyan_light, magenta_light, yellow_light;  // CMY
+var speed=0.025;
+var getSpotLight = function(colorDesired,intensity){
+    spotLight = new THREE.SpotLight( colorDesired, intensity );
+    return spotLight; }
+var addLights = function( distanceFromCenter ){
+    white_up_light = getSpotLight("#ffffff",1);
+    white_up_light.position.set(0 - tile_width, 20, 0 - tile_width);
+    scene.add(white_up_light);
+    white_down_light = getSpotLight("#ffffff",1);
+    white_down_light.position.set(0 - tile_width, -20, 0 - tile_width);
+    scene.add(white_down_light);
+    red_light = getSpotLight("#FF1493",6);
+    red_light.position.set(distanceFromCenter - tile_width, 20, distanceFromCenter - tile_width);
+    scene.add(red_light);
+    green_light = getSpotLight("#00ff00",6);
+    green_light.position.set( -distanceFromCenter - tile_width, 20, distanceFromCenter - tile_width);
+    scene.add(green_light);
+    blue_light = getSpotLight("#0000ff",6);
+    blue_light.position.set( 0 - tile_width, 20, -distanceFromCenter - tile_width);
+    scene.add(blue_light); }
+var prism, esfera, piramide, toroide;
+var figurasCreadas = false;
+var addFiguras = function(){
+    //piramide, la diferencia entre cylinder y cylinder 
+    //buffer, es que el cylinder buffer permite que la cara 
+    //superior tenga 0 de radio.
+    let geometry = new THREE.CylinderBufferGeometry(0,2,3,4);
+    let material = getMaterial("#800080");
+    piramide = new THREE.Mesh(geometry,material);
+    piramide.position.set(-4,2,3);	
+    scene.add(piramide);
+	
+	geometry = new THREE.SphereBufferGeometry(1.5,32,32);
+    material = getMaterial("#777777");
+    esfera = new THREE.Mesh(geometry,material);
+    esfera.position.set(2,3,3);	
+    scene.add(esfera);	
 
-var renderer = new THREE.WebGLRenderer({
-  antialias: true,
-  aplpha: false
-});
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(WIDTH, HEIGHT);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.setClearColor(0xcce0ff, 0.5);
-renderer.gammaInput = true;
-renderer.gammaOutput = true;
-
-var scene = new THREE.Scene();
-scene.background = new THREE.Color(0xcce0ff);
-
-init();
-
-function init() {
-  makeGround();
-  makeBulbGroup(-3,2,0, 0x0b2a9e);
-  makeBulbGroup( 0,2,0, 0xff0000);
-  makeBulbGroup( 3,2,0, 0xffee88);
-
-  // Tablero de Ajedrez
-  var geometry = new THREE.BoxGeometry( 10, 10, 1 );
-
-  var texture = new THREE.TextureLoader().load('textura.jpg');
-  var material = new THREE.MeshStandardMaterial({map: texture});
-
-  var cube = new THREE.Mesh( geometry, material );
-
-  cube.receiveShadow = true;
-
-  cube.position.set(0, 0.8,0);
-  cube.rotation.x = 80.1;
-
-  scene.add(cube);
-
-}
-
-
-
-function makeGround() {
-  var groundGeo = new THREE.PlaneGeometry(100, 100);
-  var groundMat = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    metalness: 0.65
-  });
-  groundMat.color.setHex(0xe81b05);
-
-  var ground = new THREE.Mesh(groundGeo, groundMat);
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.y = 0;
-
-  scene.add(ground);
-  ground.receiveShadow = true;
-}
-
-function makeBulbGroup(x,y,z, LightColor) {
-  group = new THREE.Group();
-  //main bulb
-  var bulbGeometry = new THREE.SphereGeometry(1, 32, 32);
-  var bulbLight = new THREE.PointLight(LightColor, 1, 100, 2);
-  var bulbMat = new THREE.MeshStandardMaterial({
-    emissive: LightColor,
-    emissiveIntensity: intensity,
-    color: LightColor,
-    roughness: 1
-  });
-
-  bulbLight.add(new THREE.Mesh(bulbGeometry, bulbMat));
-  bulbLight.position.set(0, 2, 0);
-  bulbLight.castShadow = true;
-
-  var d = 200;
-
-  bulbLight.shadow.camera.left = -d;
-  bulbLight.shadow.camera.right = d;
-  bulbLight.shadow.camera.top = d;
-  bulbLight.shadow.camera.bottom = -d;
-
-  bulbLight.shadow.camera.far = 100;
-
-  //stem
-  var bulbStem = new THREE.CylinderGeometry(0.5, 0.65, 0.55, 32);
-  var stemMat = new THREE.MeshStandardMaterial({
-    color: LightColor,
-    emissive: LightColor,
-    emissiveIntensity: intensity,
-    metalness: 0.8,
-    roughness: 0
-  });
-
-  var bStem = new THREE.Mesh(bulbStem, stemMat);
-  bStem.position.set(0, 2.9, 0);
-  bStem.castShadow = true;
-  bStem.receiveShadow = true;
-
-  //plug main
-  var bulbPlug = new THREE.CylinderGeometry(0.52, 0.52, 1.2, 32);
-
-  var plugMat = new THREE.MeshStandardMaterial({
-    color: 0x807d7a
-  });
-
-  var plug = new THREE.Mesh(bulbPlug, plugMat);
-  plug.position.set(0, 3.2, 0);
-  plug.receiveShadow = true;
-  plug.castShadow = true;
-
-  //plug top
-  var topGeo = new THREE.CylinderGeometry(0.25, 0.3, 0.2, 32);
-
-  var topMat = new THREE.MeshStandardMaterial({
-    color: 0xe8d905
-  });
-  var plugTop = new THREE.Mesh(topGeo, topMat);
-  plugTop.position.set(0, 3.75, 0);
-  plugTop.receiveShadow = true;
-  plugTop.castShadow = true;
-
-  //plug rings
-  var ringGeo = new THREE.TorusGeometry(0.52, 0.04, 4, 100);
-
-  var ringMat = new THREE.MeshStandardMaterial({
-    color: 0x807d7a
-  });
-
-  var ringY = 3.33;
-  for (i = 0; i < 3; i++) {
-    var ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = -Math.PI / 2;
-    ring.position.set(0, ringY, 0);
-    group.add(ring);
-
-    ringY += 0.15;
-  }
-
-  //top ring
-  var topRingGeo = new THREE.TorusGeometry(0.49, 0.05, 16, 100);
-
-  var topRing = new THREE.Mesh(topRingGeo, ringMat);
-  topRing.position.set(0, 3.75, 0);
-  topRing.rotation.x = -Math.PI / 2;
-
-  //bottom ring
-  var botRingGeo = new THREE.TorusGeometry(0.5, 0.05, 16, 100);
-
-  var botRing = new THREE.Mesh(botRingGeo, ringMat);
-  botRing.position.set(0, 3.15, 0);
-  botRing.rotation.x = -Math.PI / 2;
-
-  //add to group
-  group.add(bStem);
-  group.add(bulbLight);
-  group.add(plug);
-  group.add(plugTop);
-  group.add(botRing);
-  group.add(topRing);
-
-  scene.add(group);
-  group.position.y = y;
-  group.position.z = z;
-  group.position.x = x;
-}
-
-//camera
-camera = new THREE.PerspectiveCamera(
-  30,
-  window.innerWidth / window.innerHeight,
-  1,
-  10000
+    geometry = new THREE.TorusKnotGeometry(1.5,0.5,32,100);
+    material = getMaterial("#ADFF2F");   //fixed color
+    toroide = new THREE.Mesh(geometry,material);
+    toroide.position.set(2.5,5.5,-3);	
+    toroide.rotation.x = Math.PI / 2;
+    scene.add(toroide);
+    
+    geometry = new THREE.CylinderGeometry(1,1,3,8);
+    material = getMaterial("#A52A2A");
+    prism = new THREE.Mesh(geometry,material);
+    prism.position.set(-3.5,7,-3);
+	
+    scene.add(prism);	
+    figurasCreadas = true; }
+var removeFiguras = function(){
+    control.detach( prism );
+    control.detach( esfera );
+    control.detach( piramide );
+    control.detach( toroide );
+    scene.remove(prism);
+    scene.remove(esfera);
+    scene.remove(piramide);
+    scene.remove(toroide); 
+    figurasCreadas = false; }
+var rotateFigura = function(figura,vel_X,vel_Y,vel_Z){
+    if(vel_X != 0){ figura.rotation.x += vel_X; }
+    if(vel_Y != 0){ figura.rotation.y += vel_Y; }
+    if(vel_Z != 0){ figura.rotation.z += vel_Z; } }
+    var rotationOn = function(){
+        rotateFigura(piramide,0,params.speed,0); 
+        rotateFigura(prism,0,params.speed,0);
+        rotateFigura(toroide,0,params.speed,0);
+        rotateFigura(esfera,0,0,params.speed); }
+var loader = new THREE.OBJLoader();
+loader.load('obj/Chinese_dragon.obj',function ( object ) {
+    iron_man = object;
+    object.scale.set(0.1,0.1,0.1);
+    object.position.set(-1,1.5,-3);
+    object.rotation.x += 4.8;
+    scene.add( object );},
+    function ( xhr ) {console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );},
+    function ( error ) {console.log( 'Ocurrio una falla' );}
 );
+// GUI
+var params = { up_light: true, down_light: false, background: backgroundScene, 
+    red_light: false, green_light: false , blue_light: false, 
+    non_black_tiles: tile_color, geometries: true, rotation: false,speed : this.speed};
 
-camera.position.set(0, 4.25, 15);
-var controls = new THREE.TrackballControls(camera);
-controls.addEventListener('change', render);
-scene.add(camera);
+var nlines = params.length;
+var gui = new dat.GUI({ height: nlines * 32 - 1, });
 
+var scenectl = gui.addFolder("Scene control");
+scenectl.add(params, 'up_light');
+scenectl.add(params, 'down_light');
+scenectl.addColor(params, 'background').onChange(update);
+scenectl.add(params, 'red_light');
+scenectl.add(params, 'green_light');
+scenectl.add(params, 'blue_light');
+scenectl.addColor(params, 'non_black_tiles').onChange(update);
+scenectl.add(params, 'geometries');
+scenectl.add(params, 'rotation');
+scenectl.add(params, 'speed',-1,1);
 
+// --- CHANGE COLOR GUI CONTROL ---------------------------------
 
-document.body.appendChild(renderer.domElement);
+var shapectl = gui.addFolder("Shape control");
 
-camera.lookAt(new THREE.Vector3(0, 2, 0));
-
-function render() {
-  renderer.render(scene, camera);
-
-  requestAnimationFrame(render);
+var shape_params = {
+    color: "#00ffff",
 };
-
-function animate() {
-	requestAnimationFrame(animate);
-	controls.update();
+// adding folder to gui control
+shapectl.addColor(shape_params, 'color').onChange(ChangeColor).listen();
+// instantiate raycaster 
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2();
+// get mouse coordinates all the time
+function onMouseMove( event ) {
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 }
+// adding events to window
+window.addEventListener( 'mousemove', onMouseMove, false );
+document.addEventListener( 'mousedown', onDocumentMouseDown );
+// callback for event to change color
+function ChangeColor(){
+    selected_object.material.color.setHex(shape_params.color);
+};
+// callback event for mouse down
+function onDocumentMouseDown( event ) {
+            if (figurasCreadas) {
+                event.preventDefault();
+                raycaster.setFromCamera( mouse, camera );            
+                // calculate objects intersecting the picking ray
+                var intersects = raycaster.intersectObjects( scene.children );
+                // intersects[0].object.material.color.set( 0xff0000 );           
+                //validate if has objects intersected
+                if (intersects.length>0){
+                    // pick first intersected object
+                    selected_object = intersects[0].object;
+                    // change gui color
+                    shape_params.color = selected_object.material.color.getHex();                
+                    control.setMode('translate');
+                    control.attach( selected_object );
+                }
+            }
+             
+}
+// ---------------------------------------------------
 
-render();
-animate();
+
+// ----- TRANSLATE CONTROL ---------------------------
+control = new THREE.TransformControls( camera, renderer.domElement );
+control.addEventListener( 'change', render );
+control.addEventListener( 'dragging-changed', function ( event ) {
+			mouseOrbit.enabled = ! event.value;
+    } );
+scene.add( control );
+// load objects
+addTablero();
+addFiguras();
+distanceFromCenter = 1.75*tile_width;
+addLights( distanceFromCenter );
+camera.position.set(-1, 4, 16);
+// update and render loop
+var isHex = function (posible_hex) {
+    let re = /[0-9A-Fa-f]{6}/g;
+    if (re.test(posible_hex)) { return true; } 
+    else { return false; } }
+var update = function(){ 
+    // change in GUI for lights
+    if (params.up_light) { white_up_light.intensity = 1; }
+    else { white_up_light.intensity = 0; };
+
+    if (params.down_light) { white_down_light.intensity = 1; }
+    else { white_down_light.intensity = 0; };	            
+    
+    if (params.red_light) { red_light.intensity = 6; }
+    else { red_light.intensity = 0; };
+    
+    if (params.green_light) { green_light.intensity = 6; }
+    else { green_light.intensity = 0; };
+    
+    if (params.blue_light) { blue_light.intensity = 6; }
+    else { blue_light.intensity = 0; };
+
+    // change in GUI for color_tiles or background
+    let background_hex = new THREE.Color(params.background).getHexString();
+    if ( isHex(background_hex) && scene.background != "#" + background_hex ){
+            scene.background = new THREE.Color("#"+background_hex); }
+    let color_hex = new THREE.Color(params.non_black_tiles).getHexString();
+    
+    if ( isHex(color_hex) && tile_color != "#" + color_hex ){
+            tile_color = "#" + color_hex;
+            let table = scene.getObjectByName(tablero);
+            scene.remove(table);
+            addTablero(); }
+    
+            if( !figurasCreadas && params.geometries == true ){ addFiguras(); } 
+    
+    if( figurasCreadas && params.geometries == false ){ removeFiguras(); }
+    
+    if( figurasCreadas && params.rotation ){ rotationOn(); } }
+    
+function render(){ renderer.render(scene,camera); }
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    render();
+}
+window.addEventListener( 'resize', onWindowResize, false );
+var showAnimationLoop = function(){
+    requestAnimationFrame(showAnimationLoop);
+    update();
+    render(); }
+showAnimationLoop();
