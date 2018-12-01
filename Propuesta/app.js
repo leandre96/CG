@@ -88,6 +88,10 @@ var addFiguras = function(){
     scene.add(prism);	
     figurasCreadas = true; }
 var removeFiguras = function(){
+    control.detach( prism );
+    control.detach( esfera );
+    control.detach( piramide );
+    control.detach( toroide );
     scene.remove(prism);
     scene.remove(esfera);
     scene.remove(piramide);
@@ -103,8 +107,12 @@ var rotateFigura = function(figura,vel_X,vel_Y,vel_Z){
         rotateFigura(toroide,0,params.speed,0);
         rotateFigura(esfera,0,0,params.speed); }
 var loader = new THREE.OBJLoader();
-loader.load('obj/Chinese_dragon.obj',function ( object ) {iron_man = object;object.scale.set(0.1,0.1,0.1);scene.add( object );
-    object.add(pivotPoint);scene.add(pivotPoint);},
+loader.load('obj/Chinese_dragon.obj',function ( object ) {
+    iron_man = object;
+    object.scale.set(0.1,0.1,0.1);
+    object.position.set(-1,1.5,-3);
+    object.rotation.x += 4.8;
+    scene.add( object );},
     function ( xhr ) {console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );},
     function ( error ) {console.log( 'Ocurrio una falla' );}
 );
@@ -153,20 +161,22 @@ function ChangeColor(){
     selected_object.material.color.setHex(shape_params.color);
 };
 // callback event for mouse down
-function onDocumentMouseDown( event ) {    
-            event.preventDefault();
-            raycaster.setFromCamera( mouse, camera );            
-            // calculate objects intersecting the picking ray
-            var intersects = raycaster.intersectObjects( scene.children );
-            // intersects[0].object.material.color.set( 0xff0000 );           
-            //validate if has objects intersected
-            if (intersects.length>0){
-                // pick first intersected object
-                selected_object = intersects[0].object;
-                // change gui color
-                shape_params.color = selected_object.material.color.getHex();                
-                control.setMode('translate');
-                control.attach( selected_object );
+function onDocumentMouseDown( event ) {
+            if (figurasCreadas) {
+                event.preventDefault();
+                raycaster.setFromCamera( mouse, camera );            
+                // calculate objects intersecting the picking ray
+                var intersects = raycaster.intersectObjects( scene.children );
+                // intersects[0].object.material.color.set( 0xff0000 );           
+                //validate if has objects intersected
+                if (intersects.length>0){
+                    // pick first intersected object
+                    selected_object = intersects[0].object;
+                    // change gui color
+                    shape_params.color = selected_object.material.color.getHex();                
+                    control.setMode('translate');
+                    control.attach( selected_object );
+                }
             }
              
 }
