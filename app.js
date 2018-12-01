@@ -31,6 +31,7 @@ var addTablero = function(){//Función que se encargara de agregar elementos a l
             tile.position.z = (-4 + i) * tile_width;
             tablero.add(tile);
             black_color *= -1; } }
+	//se añade el tablero
     scene.add(tablero); }
 var ambient_light, white_light;               // white
 var red_light, green_light, blue_light;       // RGB
@@ -39,6 +40,7 @@ var speed=0.025;
 var getSpotLight = function(colorDesired,intensity){
     spotLight = new THREE.SpotLight( colorDesired, intensity );
     return spotLight; }
+//se añaden las luces roja, verde y azul
 var addLights = function( distanceFromCenter ){
     white_up_light = getSpotLight("#ffffff",1);
     white_up_light.position.set(0 - tile_width, 20, 0 - tile_width);
@@ -54,7 +56,9 @@ var addLights = function( distanceFromCenter ){
     scene.add(green_light);
     blue_light = getSpotLight("#0000ff",6);
     blue_light.position.set( 0 - tile_width, 20, -distanceFromCenter - tile_width);
+    //se añade la luz azul
     scene.add(blue_light); }
+    //variables para el prisma, esfera, piramide y toroide
 var prism, esfera, piramide, toroide;
 var figurasCreadas = false;
 var addFiguras = function(){
@@ -64,13 +68,15 @@ var addFiguras = function(){
     let geometry = new THREE.CylinderBufferGeometry(0,2,3,4);
     let material = getMaterial("#800080");
     piramide = new THREE.Mesh(geometry,material);
-    piramide.position.set(-4,2,3);	
+    piramide.position.set(-4,2,3);
+    //se añade la piramide
     scene.add(piramide);
 	
-	geometry = new THREE.SphereBufferGeometry(1.5,32,32);
+    geometry = new THREE.SphereBufferGeometry(1.5,32,32);
     material = getMaterial("#777777");
     esfera = new THREE.Mesh(geometry,material);
     esfera.position.set(2,3,3);	
+    //se añade la esfera
     scene.add(esfera);	
 
     geometry = new THREE.TorusKnotGeometry(1.5,0.5,32,100);
@@ -78,15 +84,18 @@ var addFiguras = function(){
     toroide = new THREE.Mesh(geometry,material);
     toroide.position.set(2.5,5.5,-3);	
     toroide.rotation.x = Math.PI / 2;
+    //se añade el toroide
     scene.add(toroide);
     
     geometry = new THREE.CylinderGeometry(1,1,3,8);
     material = getMaterial("#A52A2A");
     prism = new THREE.Mesh(geometry,material);
     prism.position.set(-3.5,7,-3);
-	
+    //se añade el prisma
     scene.add(prism);	
+	
     figurasCreadas = true; }
+//var para remover figuras
 var removeFiguras = function(){
     control.detach( prism );
     control.detach( esfera );
@@ -97,6 +106,7 @@ var removeFiguras = function(){
     scene.remove(piramide);
     scene.remove(toroide); 
     figurasCreadas = false; }
+//var para rotacion de figuras
 var rotateFigura = function(figura,vel_X,vel_Y,vel_Z){
     if(vel_X != 0){ figura.rotation.x += vel_X; }
     if(vel_Y != 0){ figura.rotation.y += vel_Y; }
@@ -123,7 +133,7 @@ var params = { up_light: true, down_light: false, background: backgroundScene,
 
 var nlines = params.length;
 var gui = new dat.GUI({ height: nlines * 32 - 1, });
-
+//se añaden los eventos
 var scenectl = gui.addFolder("Scene control");
 scenectl.add(params, 'up_light');
 scenectl.add(params, 'down_light');
