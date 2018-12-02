@@ -16,7 +16,7 @@ var tile_color="#ffffff";
 var addTablero = function(){//Función que se encargara de agregar elementos a la tablero de ajedrez
     var tile_geometry = new THREE.BoxGeometry(tile_width,tile_width/10,tile_width);
     var black_material = getMaterial("#000000");   //Color negro fijo
-    var color_material = getMaterial("#FFB6C1");  //to change with gui
+    var color_material = getMaterial("#FFB6C1");  //Cambia el color con GUI
     var black_color = -1;
 	var length = 10; //Cantidad de cuadros de lado a lado
     for(var i = 0; i < length; i++){
@@ -71,14 +71,14 @@ var addFiguras = function(){
     piramide.position.set(-4,2,3);
     //se añade la piramide
     scene.add(piramide);
-	
+    //Se crea la esfera
     geometry = new THREE.SphereBufferGeometry(1.5,32,32);
     material = getMaterial("#777777");
     esfera = new THREE.Mesh(geometry,material);
     esfera.position.set(2,3,3);	
     //se añade la esfera
     scene.add(esfera);	
-
+    //Se crea el toroide
     geometry = new THREE.TorusKnotGeometry(1.5,0.5,32,100);
     material = getMaterial("#ADFF2F");   //fixed color
     toroide = new THREE.Mesh(geometry,material);
@@ -86,7 +86,7 @@ var addFiguras = function(){
     toroide.rotation.x = Math.PI / 2;
     //se añade el toroide
     scene.add(toroide);
-    
+    //Se crea el prisma
     geometry = new THREE.CylinderGeometry(1,1,3,8);
     material = getMaterial("#A52A2A");
     prism = new THREE.Mesh(geometry,material);
@@ -95,7 +95,7 @@ var addFiguras = function(){
     scene.add(prism);	
 	
     figurasCreadas = true; }
-//var para remover figuras
+//Se crea la función que permite reomver figuras
 var removeFiguras = function(){
     control.detach( prism );
     control.detach( esfera );
@@ -106,7 +106,7 @@ var removeFiguras = function(){
     scene.remove(piramide);
     scene.remove(toroide); 
     figurasCreadas = false; }
-//var para rotacion de figuras
+//Se crea la función para rotar las figuras
 var rotateFigura = function(figura,vel_X,vel_Y,vel_Z){
     if(vel_X != 0){ figura.rotation.x += vel_X; }
     if(vel_Y != 0){ figura.rotation.y += vel_Y; }
@@ -158,12 +158,12 @@ shapectl.addColor(shape_params, 'color').onChange(ChangeColor).listen();
 // instantiate raycaster 
 var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
-// get mouse coordinates all the time
+//Función que obtiene las coordenadas del mouse todo el tiempo
 function onMouseMove( event ) {
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 }
-// adding events to window
+//Se añaden eventos a la ventana
 window.addEventListener( 'mousemove', onMouseMove, false );
 document.addEventListener( 'mousedown', onDocumentMouseDown );
 // callback for event to change color
@@ -199,11 +199,12 @@ control.addEventListener( 'change', render );
 control.addEventListener( 'dragging-changed', function ( event ) {
 			mouseOrbit.enabled = ! event.value;
     } );
+//Se añade control al scene
 scene.add( control );
 // load objects
 addTablero();
 addFiguras();
-distanceFromCenter = 1.75*tile_width;
+distanceFromCenter = 1.75*tile_width;//distancia del centro
 addLights( distanceFromCenter );
 camera.position.set(-1, 4, 16);
 // update and render loop
@@ -245,7 +246,7 @@ var update = function(){
     if( figurasCreadas && params.geometries == false ){ removeFiguras(); }
     
     if( figurasCreadas && params.rotation ){ rotationOn(); } }
-    
+
 function render(){ renderer.render(scene,camera); }
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
