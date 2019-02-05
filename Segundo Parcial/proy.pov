@@ -90,7 +90,7 @@ cylinder {<0,0,0> <19,0,0> 2.5 open texture{pigment{color Red}} finish{reflectio
           } 
 
 /*
-Incho - nazwa zmiennej powstala z polšcznia slów inhibitor i echo :P
+Incho - nazwa zmiennej powstala z pol?cznia sl?w inhibitor i echo :P
 
 */
 #macro GiveMeNineMacro(incho)
@@ -224,7 +224,8 @@ box{<-1,-1,-1> <1,1,1> scale<6,3,6>  rotate<0,45,0>  rotate<-45,45,0> translate 
 //                         ====================================================
 //================================        ++++++++++++++++++++        ================================
 //                        ========================HEAD========================
-  
+
+ 
 
  camera 
        { 
@@ -234,7 +235,9 @@ box{<-1,-1,-1> <1,1,1> scale<6,3,6>  rotate<0,45,0>  rotate<-45,45,0> translate 
       
        
     //   location <-60+(Current/16),30,40> look_at <-80+(Current/7),10,80-(Current/40)>       
-   location <-90+((Current-2000)/4),170-((Current-2000)/12),-95> look_at <0,0,-40> 
+   location <10-((Current-1990)),170+((Current-1000)/6),-95> look_at <0,0,-40>
+   
+
  
   //  location <0,30,0> look_at <0,0,0> 
        
@@ -378,7 +381,7 @@ object {GiveMeOneMacro(1570)  rotate<0,270,0>translate<65.5,0,-2.5>}       //out
 
 object {GiveMeOneMacro(1585)  rotate<0,300,0>translate<67,0,0.5>}       //outside     
 
-       // trasceiver osišgniety przez outside 
+       // trasceiver osi?gniety przez outside 
 
 
 //transceiver
